@@ -8,14 +8,20 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getSystemService
+import kotlin.math.roundToInt
 
 class MagneticSensorManager(context: Context) : SensorEventListener {
 
     private val sensorManager: SensorManager? = getSystemService(context, SensorManager::class.java)
-    private val geomagneticSensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+    private val geomagneticSensor: Sensor? =
+        sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
     init {
-        sensorManager?.registerListener(this, geomagneticSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager?.registerListener(
+            this,
+            geomagneticSensor,
+            SensorManager.SENSOR_DELAY_NORMAL,
+        )
     }
 
     val magneticField = mutableStateOf(MagneticField())
