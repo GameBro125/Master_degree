@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitManagers {
     val body: Retrofit = Retrofit.Builder()
-        .baseUrl("http://38.180.93.89:8080") // Укажите IP-адрес сервера
+        .baseUrl("http://GameBro125.pythonanywhere.com") // Укажите IP-адрес сервера
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 }
