@@ -62,28 +62,32 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun MagneticFieldInfo(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     magneticField: MagneticField,
     userLocation: Pair<Double, Double>,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    )
-    {
-        UserLocationNumbers(modifier = Modifier, userLocation = userLocation)
-        MagneticFieldNumbers(modifier = Modifier, magneticField = magneticField)
-        StateButton(modifier = Modifier, magneticField = magneticField)
+    ) {
+        UserLocationNumbers(userLocation = userLocation)
+        MagneticFieldNumbers(magneticField = magneticField)
+        StateButton(magneticField = magneticField)
     }
 }
 
 @Composable
-fun UserLocationNumbers(modifier: Modifier, userLocation: Pair<Double, Double>) {
-    Column(horizontalAlignment = Alignment.Start) {
+fun UserLocationNumbers(
+    modifier: Modifier = Modifier,
+    userLocation: Pair<Double, Double>
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start
+    ) {
         Text(
             text = stringResource(R.string.latitude) + userLocation.first,
             fontSize = 24.sp,
@@ -98,8 +102,11 @@ fun UserLocationNumbers(modifier: Modifier, userLocation: Pair<Double, Double>) 
 }
 
 @Composable
-fun MagneticFieldNumbers(modifier: Modifier, magneticField: MagneticField) {
-    Column() {
+fun MagneticFieldNumbers(
+    modifier: Modifier = Modifier,
+    magneticField: MagneticField
+) {
+    Column(modifier = modifier) {
         Text(
             text = "X: " + magneticField.x,
             fontSize = 24.sp,
@@ -125,14 +132,17 @@ fun MagneticFieldNumbers(modifier: Modifier, magneticField: MagneticField) {
 
 @Composable
 fun StateButton(
-    modifier: Modifier, magneticField: MagneticField
+    modifier: Modifier = Modifier,
+    magneticField: MagneticField
 ) {
     val context = LocalContext.current
-    Row() {
+    Row(modifier) {
         Button(
             modifier = Modifier.padding(16.dp),
             onClick = {
-                val viewModel: MagneticFieldViewModel = MagneticFieldViewModel()
+                // TODO: создание VM вынести выше и
+                //  в эту функцию передавать в параметрах метод sendMagneticFieldData
+                val viewModel = MagneticFieldViewModel()
                 viewModel.sendMagneticFieldData(magneticField, context)
             }
         ) {
@@ -154,15 +164,13 @@ fun StateButton(
 fun Preview() {
     MastersDegreeTheme {
         Surface(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-        )
-        {
+        ) {
             MagneticFieldInfo(
                 magneticField = MagneticField(),
-                modifier = Modifier,
-                userLocation = 2.0 to 2.0
+                userLocation = 2.0 to 2.0,
             )
         }
     }
