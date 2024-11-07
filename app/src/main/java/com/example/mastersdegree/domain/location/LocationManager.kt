@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -15,11 +14,10 @@ import com.google.android.gms.location.LocationServices
 
 
 class LocationManager(private val activity: Activity) {
-    private val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(activity)
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
 
     private var lastKnownLocation: Location? = null
-    var userLocation = 0.0 to 0.0
+    private var userLocation = 0.0 to 0.0
     val currentUserLocation = mutableStateOf(userLocation)
 
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
@@ -49,7 +47,7 @@ class LocationManager(private val activity: Activity) {
             lastKnownLocation = location
         }
     }
-    fun permissionCheck(onPermissionGranted: () -> Unit) {
+    private fun permissionCheck(onPermissionGranted: () -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 activity,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -80,7 +78,7 @@ class LocationManager(private val activity: Activity) {
         )
     }
 
-    fun getLastLocation(onLocationReceived: (Location?) -> Unit) {
+    private fun getLastLocation(onLocationReceived: (Location?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 activity,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -101,7 +99,7 @@ class LocationManager(private val activity: Activity) {
         }
     }
 
-    fun startLocationUpdates(onLocationUpdated: (Location) -> Unit) {
+    private fun startLocationUpdates(onLocationUpdated: (Location) -> Unit) {
         permissionCheck {
             if (ActivityCompat.checkSelfPermission(
                     activity,
