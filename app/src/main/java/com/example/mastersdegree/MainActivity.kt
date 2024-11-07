@@ -21,25 +21,38 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.mastersdegree.domain.magneticField.MagneticField
-import com.example.mastersdegree.feature.magnetic.MagneticSensorManager
 import com.example.mastersdegree.feature.location.LocationManager
-import com.example.mastersdegree.domain.remote.MagneticFieldViewModel
+import com.example.mastersdegree.feature.magnetic.MagneticSensorManager
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 
 class MainActivity : ComponentActivity() {
-    private lateinit var locationManager: LocationManager
+
+    private val locationManager by lazy { LocationManager(activity = this) }
+    private val magneticSensorManager by lazy { MagneticSensorManager(context = this) }
+
+    private val viewModelStoreOwner: ViewModelStoreOwner = this
+    private val mainViewModel by lazy {
+        ViewModelProvider.create(
+            owner = viewModelStoreOwner,
+            factory = MainViewModel.Factory,
+            extras = MutableCreationExtras().apply {
+                set(MainViewModel.LOCATION_MANAGER_KEY, locationManager)
+                set(MainViewModel.MAGNETIC_SENSOR_MANAGER_KEY, magneticSensorManager)
+            }
+        )[MainViewModel::class]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val magneticSensorManager = MagneticSensorManager(context = this)
-        locationManager = LocationManager(this)
         enableEdgeToEdge()
 
         setContent {
@@ -47,12 +60,15 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    // TODO перенести в MainViewModel
                     val magneticField by remember { magneticSensorManager.magneticField }
-                    val userLocationState by locationManager.currentUserLocation // Используем observable state
+                    val userLocationState by remember { locationManager.currentUserLocation } // Используем observable state
+
                     MagneticFieldInfo(
                         magneticField = magneticField,
                         modifier = Modifier,
-                        userLocation = userLocationState // Передаем userLocationState вместо locationManager.userLocation
+                        userLocation = userLocationState, // Передаем userLocationState вместо locationManager.userLocation
+                        onButtonClick = { mainViewModel.sendMagneticFieldData(magneticField, this) }
                     )
                 }
             }
@@ -65,6 +81,7 @@ fun MagneticFieldInfo(
     modifier: Modifier = Modifier,
     magneticField: MagneticField,
     userLocation: Pair<Double, Double>,
+    onButtonClick: () -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
@@ -73,7 +90,7 @@ fun MagneticFieldInfo(
     ) {
         UserLocationNumbers(userLocation = userLocation)
         MagneticFieldNumbers(magneticField = magneticField)
-        StateButton(magneticField = magneticField)
+        StateButton(onClick = onButtonClick)
     }
 }
 
@@ -131,18 +148,12 @@ fun MagneticFieldNumbers(
 @Composable
 fun StateButton(
     modifier: Modifier = Modifier,
-    magneticField: MagneticField
+    onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    Row(modifier) {
+    Row(modifier = modifier) {
         Button(
             modifier = Modifier.padding(16.dp),
-            onClick = {
-                // TODO: создание VM вынести выше и
-                //  в эту функцию передавать в параметрах метод sendMagneticFieldData
-                val viewModel = MagneticFieldViewModel()
-                viewModel.sendMagneticFieldData(magneticField, context)
-            }
+            onClick = onClick
         ) {
             Text(
                 text = stringResource(R.string.sendButton),
@@ -169,6 +180,7 @@ fun Preview() {
             MagneticFieldInfo(
                 magneticField = MagneticField(),
                 userLocation = 2.0 to 2.0,
+                onButtonClick = {}
             )
         }
     }
