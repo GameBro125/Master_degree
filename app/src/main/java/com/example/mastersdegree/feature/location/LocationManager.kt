@@ -3,6 +3,7 @@ package com.example.mastersdegree.feature.location
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +12,6 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-
 
 class LocationManager(private val activity: Activity) {
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
@@ -57,6 +57,7 @@ class LocationManager(private val activity: Activity) {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
+            // TODO Это должно быть не тут
             AlertDialog.Builder(activity)
                 .setTitle("Location Permission Needed")
                 .setMessage("This app needs the Location permission, please accept to use location functionality")
@@ -71,6 +72,7 @@ class LocationManager(private val activity: Activity) {
     }
 
     private fun requestLocationPermission() {
+        // TODO Это должно быть не тут
         ActivityCompat.requestPermissions(
             activity,
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),

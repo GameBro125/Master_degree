@@ -45,7 +45,6 @@ class MainViewModel(
     }
 
     companion object {
-
         val LOCATION_MANAGER_KEY = object : CreationExtras.Key<LocationManager> {}
         val MAGNETIC_SENSOR_MANAGER_KEY = object : CreationExtras.Key<MagneticSensorManager> {}
 
