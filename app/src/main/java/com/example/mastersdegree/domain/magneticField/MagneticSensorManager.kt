@@ -1,4 +1,4 @@
-package com.example.mastersdegree.domain
+package com.example.mastersdegree.domain.magneticField
 
 
 import android.content.Context
@@ -8,7 +8,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getSystemService
-import kotlin.math.roundToInt
 
 class MagneticSensorManager(context: Context) : SensorEventListener {
 

@@ -2,4 +2,8 @@
 <resources>
     <string name="app_name">Диплом магистра</string>
     <string name="sendButton">Отправить</string>
+    <string name="latitude">Широта:</string>
+    <string name="longitude">Долгота:</string>
+    <string name="data_sent">Данные отправлены</string>
+    <string name="sending_error">Ошибка отправки</string>
 </resources>

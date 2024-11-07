@@ -1,60 +1,39 @@
 package com.example.mastersdegree
 
-import android.Manifest
-import android.app.AlertDialog
-import android.content.pm.PackageManager
-import android.graphics.drawable.shapes.Shape
-import android.location.Location
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.DefaultShadowColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import com.example.mastersdegree.domain.MagneticField
-import com.example.mastersdegree.domain.MagneticSensorManager
+import com.example.mastersdegree.domain.magneticField.MagneticField
+import com.example.mastersdegree.domain.magneticField.MagneticSensorManager
 import com.example.mastersdegree.domain.location.LocationManager
-import com.example.mastersdegree.domain.remote.ApiService
 import com.example.mastersdegree.domain.remote.MagneticFieldViewModel
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     private lateinit var locationManager: LocationManager
@@ -104,14 +83,14 @@ fun MagneticFieldInfo(
 
 @Composable
 fun UserLocationNumbers(modifier: Modifier, userLocation: Pair<Double, Double>) {
-    Column (horizontalAlignment = Alignment.Start) {
+    Column(horizontalAlignment = Alignment.Start) {
         Text(
-            text = "Latitude: " + userLocation.first,
+            text = stringResource(R.string.latitude) + userLocation.first,
             fontSize = 24.sp,
             fontWeight = FontWeight.W300
         )
         Text(
-            text = "Longitude: " + userLocation.second,
+            text = stringResource(R.string.longitude) + userLocation.second,
             fontSize = 24.sp,
             fontWeight = FontWeight.W300
         )
@@ -120,7 +99,7 @@ fun UserLocationNumbers(modifier: Modifier, userLocation: Pair<Double, Double>) 
 
 @Composable
 fun MagneticFieldNumbers(modifier: Modifier, magneticField: MagneticField) {
-    Column {
+    Column() {
         Text(
             text = "X: " + magneticField.x,
             fontSize = 24.sp,
@@ -148,12 +127,13 @@ fun MagneticFieldNumbers(modifier: Modifier, magneticField: MagneticField) {
 fun StateButton(
     modifier: Modifier, magneticField: MagneticField
 ) {
+    val context = LocalContext.current
     Row() {
         Button(
             modifier = Modifier.padding(16.dp),
             onClick = {
                 val viewModel: MagneticFieldViewModel = MagneticFieldViewModel()
-                viewModel.sendMagneticFieldData(magneticField)
+                viewModel.sendMagneticFieldData(magneticField, context)
             }
         ) {
             Text(

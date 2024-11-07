@@ -1,4 +1,4 @@
-package com.example.mastersdegree.domain
+package com.example.mastersdegree.domain.magneticField
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent

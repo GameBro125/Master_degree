@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">Master\'s degree</string>
     <string name="sendButton">Send</string>
+    <string name="latitude">Latitude:</string>
+    <string name="longitude">Longitude:</string>
 </resources>
