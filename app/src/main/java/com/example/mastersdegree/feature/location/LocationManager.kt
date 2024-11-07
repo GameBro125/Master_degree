@@ -3,10 +3,11 @@ package com.example.mastersdegree.feature.location
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -18,7 +19,7 @@ class LocationManager(private val activity: Activity) {
 
     private var lastKnownLocation: Location? = null
     private var userLocation = 0.0 to 0.0
-    val currentUserLocation = mutableStateOf(userLocation)
+    var currentUserLocation by mutableStateOf(userLocation)
 
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 30000 // Интервал обновления, например, каждые 30 секунд
@@ -43,7 +44,7 @@ class LocationManager(private val activity: Activity) {
         val distance = lastKnownLocation?.distanceTo(location) ?: Float.MAX_VALUE
         if (distance > 1) { // Обновление состояния, если изменение > 10 метров
             userLocation = location.latitude to location.longitude
-            currentUserLocation.value = userLocation
+            currentUserLocation = userLocation
             lastKnownLocation = location
         }
     }

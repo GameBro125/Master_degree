@@ -6,7 +6,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.mastersdegree.domain.magneticField.MagneticField
 
@@ -24,12 +26,12 @@ class MagneticSensorManager(context: Context) : SensorEventListener {
         )
     }
 
-    val magneticField = mutableStateOf(MagneticField())
+    var magneticField by mutableStateOf(MagneticField())
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
             val geomagneticValues = event.values // Массив значений магнитного поля по осям X, Y, Z
-            magneticField.value = magneticField.value.copy(
+            magneticField = magneticField.copy(
                 x = geomagneticValues[0],
                 y = geomagneticValues[1],
                 z = geomagneticValues[2]

@@ -18,7 +18,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.mastersdegree.domain.magneticField.MagneticField
 import com.example.mastersdegree.feature.location.LocationManager
@@ -60,15 +60,12 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // TODO перенести в MainViewModel
-                    val magneticField by remember { magneticSensorManager.magneticField }
-                    val userLocationState by remember { locationManager.currentUserLocation } // Используем observable state
+                    val state by mainViewModel.state.collectAsStateWithLifecycle()
 
                     MagneticFieldInfo(
-                        magneticField = magneticField,
-                        modifier = Modifier,
-                        userLocation = userLocationState, // Передаем userLocationState вместо locationManager.userLocation
-                        onButtonClick = { mainViewModel.sendMagneticFieldData(magneticField, this) }
+                        magneticField = state.magneticField,
+                        userLocation = state.location,
+                        onButtonClick = { mainViewModel.sendMagneticFieldData(this) }
                     )
                 }
             }
@@ -79,8 +76,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MagneticFieldInfo(
     modifier: Modifier = Modifier,
-    magneticField: MagneticField,
-    userLocation: Pair<Double, Double>,
+    magneticField: MagneticField?,
+    userLocation: Pair<Double, Double>?,
     onButtonClick: () -> Unit,
 ) {
     Column(
@@ -88,8 +85,12 @@ fun MagneticFieldInfo(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        UserLocationNumbers(userLocation = userLocation)
-        MagneticFieldNumbers(magneticField = magneticField)
+        if (userLocation != null)
+            UserLocationNumbers(userLocation = userLocation)
+
+        if (magneticField != null)
+            MagneticFieldNumbers(magneticField = magneticField)
+
         StateButton(onClick = onButtonClick)
     }
 }
