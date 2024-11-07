@@ -1,6 +1,5 @@
 package com.example.mastersdegree
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
@@ -31,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mastersdegree.domain.magneticField.MagneticField
 import com.example.mastersdegree.domain.magneticField.MagneticSensorManager
-import com.example.mastersdegree.domain.location.LocationManager
+import com.example.mastersdegree.feature.location.LocationManager
 import com.example.mastersdegree.domain.remote.MagneticFieldViewModel
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 

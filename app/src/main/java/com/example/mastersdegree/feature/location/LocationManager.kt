@@ -1,4 +1,4 @@
-package com.example.mastersdegree.domain.location
+package com.example.mastersdegree.feature.location
 
 import android.Manifest
 import android.app.Activity
