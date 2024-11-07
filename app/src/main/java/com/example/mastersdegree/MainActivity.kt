@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mastersdegree.domain.magneticField.MagneticField
-import com.example.mastersdegree.domain.magneticField.MagneticSensorManager
+import com.example.mastersdegree.feature.magnetic.MagneticSensorManager
 import com.example.mastersdegree.feature.location.LocationManager
 import com.example.mastersdegree.domain.remote.MagneticFieldViewModel
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme

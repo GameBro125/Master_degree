@@ -1,4 +1,4 @@
-package com.example.mastersdegree.domain.magneticField
+package com.example.mastersdegree.feature.magnetic
 
 
 import android.content.Context
@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getSystemService
+import com.example.mastersdegree.domain.magneticField.MagneticField
 
 class MagneticSensorManager(context: Context) : SensorEventListener {
 
