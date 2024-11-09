@@ -9,8 +9,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.mastersdegree.feature.RetrofitManagers
 import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
+import com.example.mastersdegree.feature.magnetic.shared.api.MagneticRetrofitStore
 import com.example.mastersdegree.feature.magnetic.shared.api.MagneticService
 import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +31,7 @@ class MainViewModel(
 ) : ViewModel() {
 
     // TODO Пренести в конструктор
-    private val apiService by lazy { RetrofitManagers.body.create(MagneticService::class.java) }
+    private val apiService by lazy { MagneticRetrofitStore.body.create(MagneticService::class.java) }
 
     private val _state = MutableStateFlow(MainViewState())
     val state = _state.asStateFlow()
