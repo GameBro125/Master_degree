@@ -12,10 +12,59 @@ import androidx.compose.ui.unit.sp
 import com.example.mastersdegree.R
 import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
+import com.eygraber.compose.permissionx.PermissionStatus
+import com.eygraber.compose.permissionx.rememberPermissionState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun UserLocationNumbers(
     modifier: Modifier = Modifier,
+    locationEntity: LocationEntity?,
+    requestLocationUpdates: () -> Unit,
+) {
+
+    val locationPermissionState = rememberPermissionState(
+        android.Manifest.permission.ACCESS_FINE_LOCATION
+    )
+
+    when (locationPermissionState.status) {
+
+        PermissionStatus.Granted -> {
+            requestLocationUpdates()
+            if (locationEntity != null)
+                UserLocationNumbersRoot(modifier, locationEntity)
+        }
+
+        PermissionStatus.NotGranted.NotRequested -> {
+            NoLocationPermissionText(
+                modifier = modifier,
+                requestPermission = { locationPermissionState.launchPermissionRequest() }
+            )
+        }
+
+        PermissionStatus.NotGranted.Denied ->
+            NoLocationPermissionText(
+                modifier = modifier,
+                angryMode = true,
+                requestPermission = { locationPermissionState.launchPermissionRequest() }
+            )
+
+        PermissionStatus.NotGranted.PermanentlyDenied -> {
+            NoLocationPermissionText(
+                modifier = modifier,
+                superAngryMode = true,
+                requestPermission = { locationPermissionState.openAppSettings() }
+            )
+        }
+    }
+
+
+}
+
+@Composable
+private fun UserLocationNumbersRoot(
+    modifier: Modifier,
     locationEntity: LocationEntity
 ) {
     Column(
@@ -40,7 +89,8 @@ fun UserLocationNumbers(
 private fun UserLocationNumbersPreview() {
     MastersDegreeTheme {
         UserLocationNumbers(
-            locationEntity = LocationEntity(longitude = 1.0, latitude = 1.0)
+            locationEntity = LocationEntity(longitude = 1.0, latitude = 1.0),
+            requestLocationUpdates = { }
         )
     }
 }

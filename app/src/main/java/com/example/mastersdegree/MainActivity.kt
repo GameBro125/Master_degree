@@ -65,15 +65,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val state by mainViewModel.state.collectAsStateWithLifecycle()
-                    val onButtonClick by remember {
-                        mutableStateOf(
-                            { mainViewModel.sendMagneticFieldData(this) }
-                        )
+                    val sendData by remember {
+                        mutableStateOf({ mainViewModel.sendMagneticFieldData(this) })
+                    }
+                    val requestLocationUpdates by remember {
+                        mutableStateOf({ locationDataStore.requestLocationUpdates() })
                     }
                     MainField(
                         magneticField = state.magneticField,
                         userLocation = state.location,
-                        onButtonClick = onButtonClick
+                        onButtonClick = sendData,
+                        requestLocationUpdates = requestLocationUpdates
                     )
                 }
             }
@@ -86,6 +88,7 @@ fun MainField(
     modifier: Modifier = Modifier,
     magneticField: MagneticFieldEntity?,
     userLocation: LocationEntity?,
+    requestLocationUpdates: () -> Unit,
     onButtonClick: () -> Unit,
 ) {
     Column(
@@ -93,11 +96,17 @@ fun MainField(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (userLocation != null)
-            UserLocationNumbers(locationEntity = userLocation)
+        UserLocationNumbers(
+            modifier = Modifier.padding(bottom = 32.dp),
+            locationEntity = userLocation,
+            requestLocationUpdates = requestLocationUpdates,
+        )
 
         if (magneticField != null)
-            MagneticFieldNumbers(magneticField = magneticField)
+            MagneticFieldNumbers(
+                modifier = Modifier.padding(bottom = 20.dp),
+                magneticField = magneticField
+            )
 
         StateButton(onClick = onButtonClick)
     }
@@ -138,7 +147,8 @@ fun Preview() {
             MainField(
                 magneticField = MagneticFieldEntity(),
                 userLocation = LocationEntity(longitude = 1.0, latitude = 1.0),
-                onButtonClick = {}
+                requestLocationUpdates = {},
+                onButtonClick = {},
             )
         }
     }
