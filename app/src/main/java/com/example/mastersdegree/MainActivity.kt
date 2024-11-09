@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,15 +30,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
-import com.example.mastersdegree.domain.magneticField.MagneticField
-import com.example.mastersdegree.feature.location.LocationManager
-import com.example.mastersdegree.feature.magnetic.MagneticSensorManager
+import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
+import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
+import com.example.mastersdegree.feature.location.ui.component.UserLocationNumbers
+import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
+import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.magnetic.ui.component.MagneticFieldNumbers
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val locationManager by lazy { LocationManager(activity = this) }
-    private val magneticSensorManager by lazy { MagneticSensorManager(context = this) }
+    private val locationDataStore by lazy { LocationDataStore(activity = this) }
+    private val magneticSensorDataStore by lazy { MagneticSensorDataStore(context = this) }
 
     private val viewModelStoreOwner: ViewModelStoreOwner = this
     private val mainViewModel by lazy {
@@ -47,8 +49,8 @@ class MainActivity : ComponentActivity() {
             owner = viewModelStoreOwner,
             factory = MainViewModel.Factory,
             extras = MutableCreationExtras().apply {
-                set(MainViewModel.LOCATION_MANAGER_KEY, locationManager)
-                set(MainViewModel.MAGNETIC_SENSOR_MANAGER_KEY, magneticSensorManager)
+                set(MainViewModel.LOCATION_MANAGER_KEY, locationDataStore)
+                set(MainViewModel.MAGNETIC_SENSOR_MANAGER_KEY, magneticSensorDataStore)
             }
         )[MainViewModel::class]
     }
@@ -68,7 +70,7 @@ class MainActivity : ComponentActivity() {
                             { mainViewModel.sendMagneticFieldData(this) }
                         )
                     }
-                    MagneticFieldInfo(
+                    MainField(
                         magneticField = state.magneticField,
                         userLocation = state.location,
                         onButtonClick = onButtonClick
@@ -80,10 +82,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MagneticFieldInfo(
+fun MainField(
     modifier: Modifier = Modifier,
-    magneticField: MagneticField?,
-    userLocation: Pair<Double, Double>?,
+    magneticField: MagneticFieldEntity?,
+    userLocation: LocationEntity?,
     onButtonClick: () -> Unit,
 ) {
     Column(
@@ -92,63 +94,12 @@ fun MagneticFieldInfo(
         verticalArrangement = Arrangement.Center
     ) {
         if (userLocation != null)
-            UserLocationNumbers(userLocation = userLocation)
+            UserLocationNumbers(locationEntity = userLocation)
 
         if (magneticField != null)
             MagneticFieldNumbers(magneticField = magneticField)
 
         StateButton(onClick = onButtonClick)
-    }
-}
-
-@Composable
-fun UserLocationNumbers(
-    modifier: Modifier = Modifier,
-    userLocation: Pair<Double, Double>
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = stringResource(R.string.latitude) + userLocation.first,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
-        Text(
-            text = stringResource(R.string.longitude) + userLocation.second,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
-    }
-}
-
-@Composable
-fun MagneticFieldNumbers(
-    modifier: Modifier = Modifier,
-    magneticField: MagneticField
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = "X: " + magneticField.x,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
-        Text(
-            text = "Y: " + magneticField.y,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
-        Text(
-            text = "Z: " + magneticField.z,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
-        Text(
-            text = "|B|: " + magneticField.getVector(),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W300
-        )
     }
 }
 
@@ -184,9 +135,9 @@ fun Preview() {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            MagneticFieldInfo(
-                magneticField = MagneticField(),
-                userLocation = 2.0 to 2.0,
+            MainField(
+                magneticField = MagneticFieldEntity(),
+                userLocation = LocationEntity(longitude = 1.0, latitude = 1.0),
                 onButtonClick = {}
             )
         }

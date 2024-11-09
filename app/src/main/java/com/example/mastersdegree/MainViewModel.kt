@@ -9,9 +9,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.mastersdegree.domain.remote.createApiService
-import com.example.mastersdegree.feature.location.LocationManager
-import com.example.mastersdegree.feature.magnetic.MagneticSensorManager
+import com.example.mastersdegree.feature.RetrofitManagers
+import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
+import com.example.mastersdegree.feature.magnetic.shared.api.MagneticService
+import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,14 +24,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val locationManager: LocationManager,
-    private val magneticSensorManager: MagneticSensorManager,
+    private val locationDataStore: LocationDataStore,
+    private val magneticSensorDataStore: MagneticSensorDataStore,
     private val scopeIO: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO),
     private val scopeUI: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main.immediate),
 ) : ViewModel() {
 
     // TODO Пренести в конструктор
-    private val apiService by lazy { createApiService() }
+    private val apiService by lazy { RetrofitManagers.body.create(MagneticService::class.java) }
 
     private val _state = MutableStateFlow(MainViewState())
     val state = _state.asStateFlow()
@@ -41,7 +42,7 @@ class MainViewModel(
     }
 
     private fun observeMagneticField() {
-        snapshotFlow { magneticSensorManager.magneticField }
+        snapshotFlow { magneticSensorDataStore.magneticField }
             .onEach { field ->
                 _state.update { state ->
                     state.copy(magneticField = field)
@@ -51,7 +52,7 @@ class MainViewModel(
     }
 
     private fun observeLocation() {
-        snapshotFlow { locationManager.currentUserLocation }
+        snapshotFlow { locationDataStore.currentLocation }
             .onEach { location ->
                 _state.update { state ->
                     state.copy(location = location)
@@ -85,14 +86,14 @@ class MainViewModel(
     }
 
     companion object {
-        val LOCATION_MANAGER_KEY = object : CreationExtras.Key<LocationManager> {}
-        val MAGNETIC_SENSOR_MANAGER_KEY = object : CreationExtras.Key<MagneticSensorManager> {}
+        val LOCATION_MANAGER_KEY = object : CreationExtras.Key<LocationDataStore> {}
+        val MAGNETIC_SENSOR_MANAGER_KEY = object : CreationExtras.Key<MagneticSensorDataStore> {}
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val locationManager = this[LOCATION_MANAGER_KEY] as LocationManager
-                val magneticSensorManager = this[MAGNETIC_SENSOR_MANAGER_KEY] as MagneticSensorManager
-                MainViewModel(locationManager, magneticSensorManager)
+                val locationDataStore = this[LOCATION_MANAGER_KEY] as LocationDataStore
+                val magneticSensorDataStore = this[MAGNETIC_SENSOR_MANAGER_KEY] as MagneticSensorDataStore
+                MainViewModel(locationDataStore, magneticSensorDataStore)
             }
         }
     }

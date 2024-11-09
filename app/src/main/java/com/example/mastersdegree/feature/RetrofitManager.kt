@@ -1,9 +1,9 @@
-package com.example.mastersdegree.domain.remote
+package com.example.mastersdegree.feature
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitManagers {
+object RetrofitManagers {
     val body: Retrofit = Retrofit.Builder()
         .baseUrl("http://GameBro125.pythonanywhere.com") // Укажите IP-адрес сервера
         .addConverterFactory(GsonConverterFactory.create())

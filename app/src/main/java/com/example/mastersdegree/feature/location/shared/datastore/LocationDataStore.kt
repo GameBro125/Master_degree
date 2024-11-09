@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.location
+package com.example.mastersdegree.feature.location.shared.datastore
 
 import android.Manifest
 import android.app.Activity
@@ -9,17 +9,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
+import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 
-class LocationManager(private val activity: Activity) {
+// TODO: Похорошему сделать интерфейс
+class LocationDataStore(private val activity: Activity) {
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
 
     private var lastKnownLocation: Location? = null
-    private var userLocation = 0.0 to 0.0
-    var currentUserLocation by mutableStateOf(userLocation)
+    var currentLocation: LocationEntity? by mutableStateOf(null)
 
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 30000 // Интервал обновления, например, каждые 30 секунд
@@ -43,11 +44,14 @@ class LocationManager(private val activity: Activity) {
     private fun updateLocationState(location: Location) {
         val distance = lastKnownLocation?.distanceTo(location) ?: Float.MAX_VALUE
         if (distance > 1) { // Обновление состояния, если изменение > 10 метров
-            userLocation = location.latitude to location.longitude
-            currentUserLocation = userLocation
             lastKnownLocation = location
+            currentLocation = LocationEntity(
+                longitude = location.longitude,
+                latitude = location.latitude
+            )
         }
     }
+
     private fun permissionCheck(onPermissionGranted: () -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 activity,

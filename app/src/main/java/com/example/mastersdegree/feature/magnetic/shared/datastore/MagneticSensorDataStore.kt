@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.magnetic
+package com.example.mastersdegree.feature.magnetic.shared.datastore
 
 
 import android.content.Context
@@ -10,13 +10,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat.getSystemService
-import com.example.mastersdegree.domain.magneticField.MagneticField
+import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
 
-class MagneticSensorManager(context: Context) : SensorEventListener {
+
+// Добавить интерфейс
+class MagneticSensorDataStore(context: Context) : SensorEventListener {
 
     private val sensorManager: SensorManager? = getSystemService(context, SensorManager::class.java)
-    private val geomagneticSensor: Sensor? =
-        sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+    private val geomagneticSensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
     init {
         sensorManager?.registerListener(
@@ -26,7 +27,7 @@ class MagneticSensorManager(context: Context) : SensorEventListener {
         )
     }
 
-    var magneticField by mutableStateOf(MagneticField())
+    var magneticField by mutableStateOf(MagneticFieldEntity())
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
