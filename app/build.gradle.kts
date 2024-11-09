@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.play.services.location)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation (libs.accompanist.permissions)
     implementation(libs.compose.permissionx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

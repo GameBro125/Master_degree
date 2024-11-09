@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package com.example.mastersdegree.feature.location.ui.component
 
 import androidx.compose.foundation.layout.Column
@@ -16,7 +18,6 @@ import com.eygraber.compose.permissionx.PermissionStatus
 import com.eygraber.compose.permissionx.rememberPermissionState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun UserLocationNumbers(
     modifier: Modifier = Modifier,
