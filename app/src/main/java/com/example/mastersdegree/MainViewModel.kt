@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.mastersdegree.feature.location.shared.api.LocationService
 import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
 import com.example.mastersdegree.feature.magnetic.shared.api.MagneticRetrofitStore
 import com.example.mastersdegree.feature.magnetic.shared.api.MagneticService
@@ -30,8 +31,10 @@ class MainViewModel(
     private val scopeUI: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main.immediate),
 ) : ViewModel() {
 
-    // TODO Пренести в конструктор
-    private val apiService by lazy { MagneticRetrofitStore.body.create(MagneticService::class.java) }
+    // TODO Перенести в конструктор
+    private val apiMagneticFieldService by lazy { MagneticRetrofitStore.body.create(MagneticService::class.java) }
+    private val apiLocationService by lazy { MagneticRetrofitStore.body.create(LocationService::class.java) }
+
 
     private val _state = MutableStateFlow(MainViewState())
     val state = _state.asStateFlow()
@@ -71,10 +74,32 @@ class MainViewModel(
                     return@launch
                 }
 
-                val response = apiService.sendMagneticField(magneticField)
+                val response = apiMagneticFieldService.sendMagneticField(magneticField)
                 if (response.isSuccessful) {
                     // Обработка успешного ответа
                     val vector = response.body()?.vector
+                    Toast.makeText(context, context.getString(R.string.data_sent), Toast.LENGTH_LONG).show()
+                } else
+                    Toast.makeText(context, context.getString(R.string.sending_error), Toast.LENGTH_LONG).show()
+
+            } catch (e: Exception) {
+                println("Ошибка: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun sendLocationData(context: Context) {
+        viewModelScope.launch {
+            try {
+                val location = _state.value.location
+                if (location == null) {
+                    Toast.makeText(context, context.getString(R.string.sending_error), Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+
+                val response = apiLocationService.sendLocation(location)
+                if (response.isSuccessful) {
+                    // Обработка успешного ответа
                     Toast.makeText(context, context.getString(R.string.data_sent), Toast.LENGTH_LONG).show()
                 } else
                     Toast.makeText(context, context.getString(R.string.sending_error), Toast.LENGTH_LONG).show()

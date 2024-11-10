@@ -66,7 +66,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val state by mainViewModel.state.collectAsStateWithLifecycle()
                     val sendData by remember {
-                        mutableStateOf({ mainViewModel.sendMagneticFieldData(this) })
+                        mutableStateOf({
+                            mainViewModel.sendMagneticFieldData(this)
+                            mainViewModel.sendLocationData(this)
+                        })
                     }
                     val requestLocationUpdates by remember {
                         mutableStateOf({ locationDataStore.requestLocationUpdates() })

@@ -8,5 +8,8 @@ import retrofit2.http.POST
 
 interface MagneticService {
     @POST("magnetic-field")
-    suspend fun sendMagneticField(@Body magneticField: MagneticFieldEntity): Response<MagneticVectorResponse>
+    suspend fun sendMagneticField(
+        @Body
+        magneticField: MagneticFieldEntity
+    ): Response<MagneticVectorResponse>
 }
