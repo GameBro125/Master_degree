@@ -1,51 +1,66 @@
 import json
 from flask import Flask, request, jsonify
-import math
 from datetime import datetime
+import math
 
 app = Flask(__name__)
 DATA_FILE = "magnetic_field_data.txt"
 
 def save_data_to_file(data):
-    # Добавляем дату и время к данным
-    data["timestamp"] = datetime.now().isoformat()  # Используем ISO формат для даты и времени
+    # Добавляем метку времени
+    data["timestamp"] = datetime.now().isoformat()  # ISO формат даты и времени
     
-    # Записываем данные в текстовый файл в формате JSON
+    # Записываем данные в файл в формате JSON
     with open(DATA_FILE, "a") as file:
         file.write(json.dumps(data) + "\n")
 
 @app.route('/magnetic-field', methods=['POST'])
-def get_magnetic_field():
+def receive_data():
     data = request.json  # Получаем JSON из POST-запроса
-    
-    if 'x' not in data or 'y' not in data or 'z' not in data:
+
+    # Проверяем наличие необходимых данных в запросе
+    if 'location' not in data or 'magneticField' not in data:
         return jsonify({"error": "Invalid data"}), 400
 
-    x = data['x']
-    y = data['y']
-    z = data['z']
+    # Извлекаем данные местоположения
+    location = data['location']
+    if 'longitude' not in location or 'latitude' not in location:
+        return jsonify({"error": "Invalid location data"}), 400
+
+    longitude = location['longitude']
+    latitude = location['latitude']
+
+    # Извлекаем данные магнитного поля
+    magnetic_field = data['magneticField']
+    if 'x' not in magnetic_field or 'y' not in magnetic_field or 'z' not in magnetic_field:
+        return jsonify({"error": "Invalid magnetic field data"}), 400
+
+    x = magnetic_field['x']
+    y = magnetic_field['y']
+    z = magnetic_field['z']
 
     # Вычисляем вектор магнитного поля
     vector = math.sqrt(x * x + y * y + z * z)
-    response_data = {"x": x, "y": y, "z": z, "vector": vector}
 
-    # Сохраняем данные с магнитным полем, дополнив запись временем
+    # Формируем данные для записи и отправки обратно
+    response_data = {
+        "location": {
+            "longitude": longitude,
+            "latitude": latitude
+        },
+        "magneticField": {
+            "x": x,
+            "y": y,
+            "z": z,
+            "vector": vector
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+    # Сохраняем данные в файл
     save_data_to_file(response_data)
-    return jsonify({"vector": vector})
 
-@app.route('/location', methods=['POST'])
-def get_location_field():
-    data = request.json  # Получаем JSON из POST-запроса
-    
-    if 'longitude' not in data or 'latitude' not in data:
-        return jsonify({"error": "Invalid data"}), 400
-
-    longitude = data['longitude']
-    latitude = data['latitude']
-
-    # Формируем данные для записи и сохраняем в файл с временем
-    response_data = {"longitude": longitude, "latitude": latitude}
-    save_data_to_file(response_data)
+    # Возвращаем ответ с вычисленным вектором
     return jsonify(response_data), 200
 
 if __name__ == '__main__':

@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
 import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
+import com.example.mastersdegree.feature.location.ui.component.SendButton
 import com.example.mastersdegree.feature.location.ui.component.UserLocationNumbers
 import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
 import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
@@ -67,8 +71,9 @@ class MainActivity : ComponentActivity() {
                     val state by mainViewModel.state.collectAsStateWithLifecycle()
                     val sendData by remember {
                         mutableStateOf({
-                            mainViewModel.sendMagneticFieldData(this)
-                            mainViewModel.sendLocationData(this)
+//                            mainViewModel.sendMagneticFieldData(this)
+//                            mainViewModel.sendLocationData(this)
+                            mainViewModel.sendData(this)
                         })
                     }
                     val requestLocationUpdates by remember {
@@ -111,30 +116,7 @@ fun MainField(
                 magneticField = magneticField
             )
 
-        StateButton(onClick = onButtonClick)
-    }
-}
-
-@Composable
-fun StateButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Row(modifier = modifier) {
-        Button(
-            modifier = Modifier.padding(16.dp),
-            onClick = onClick
-        ) {
-            Text(
-                text = stringResource(R.string.sendButton),
-                fontSize = 16.sp
-            )
-            Spacer(modifier = Modifier.padding(16.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.Send,
-                contentDescription = stringResource(R.string.sendButton)
-            )
-        }
+        SendButton(onClick = onButtonClick)
     }
 }
 
