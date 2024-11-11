@@ -5,4 +5,6 @@
     <string name="longitude">Longitude:</string>
     <string name="data_sent">Data sent</string>
     <string name="sending_error">Sending error</string>
+    <string name="noSendPermissionButtonText">No permission</string>
+    <string name="locationPermissionAsk">Give geolocation permission</string>
 </resources>

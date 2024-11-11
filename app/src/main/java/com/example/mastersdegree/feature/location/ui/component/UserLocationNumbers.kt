@@ -2,6 +2,7 @@
 
 package com.example.mastersdegree.feature.location.ui.component
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,20 +19,32 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mastersdegree.MainViewModel
+import com.example.mastersdegree.MainViewModel.Companion.GPS_REQUEST_LOCATION
 import com.example.mastersdegree.R
 import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 import com.eygraber.compose.permissionx.PermissionStatus
 import com.eygraber.compose.permissionx.rememberPermissionState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
+
 
 @Composable
 fun UserLocationNumbers(
@@ -79,7 +92,7 @@ fun UserLocationNumbers(
 @Composable
 private fun UserLocationNumbersRoot(
     modifier: Modifier,
-    locationEntity: LocationEntity
+    locationEntity: LocationEntity,
 ) {
 
     Column(
@@ -103,6 +116,7 @@ private fun UserLocationNumbersRoot(
 fun SendButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    activity: Activity
 ) {
     val locationPermissionState = rememberPermissionState(
         android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -121,8 +135,9 @@ fun SendButton(
                         text = stringResource(R.string.sendButton),
                         fontSize = 16.sp
                     )
-                    Spacer(modifier = Modifier.padding(16.dp))
+                    Spacer(Modifier.padding(horizontal = 8.dp))
                     Icon(
+                        modifier = Modifier.padding(8.dp),
                         imageVector = Icons.AutoMirrored.Outlined.Send,
                         contentDescription = stringResource(R.string.sendButton)
                     )
@@ -133,20 +148,40 @@ fun SendButton(
                 Button(
                     modifier = Modifier.padding(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
-                    onClick = onClick,
-                    enabled = false
+                    enabled = true,
+                    onClick = {
+                        if (locationPermissionState.status == PermissionStatus.NotGranted.Denied || locationPermissionState.status == PermissionStatus.NotGranted.NotRequested)
+                            locationPermissionState.launchPermissionRequest()
+                        if (locationPermissionState.status == PermissionStatus.NotGranted.PermanentlyDenied) locationPermissionState.openAppSettings()
+                    },
                 ) {
                     Text(
-                        text = stringResource(R.string.sendButton),
+                        text = stringResource(R.string.noSendPermissionButtonText),
                         fontSize = 16.sp
                     )
-                    Spacer(modifier = Modifier.padding(8.dp))
                     Icon(
-                        imageVector = Icons.Filled.Place,
+                        modifier = Modifier.padding(8.dp),
+                        imageVector = Icons.Filled.LocationOn,
                         contentDescription = stringResource(R.string.sendButton),
-                        tint = Color.Red
+                        tint = Color.Gray
                     )
                 }
+            }
+        }
+    }
+}
+
+fun showEnableLocationSetting(activity: Activity) {
+    val locationRequest = LocationRequest.create()
+    locationRequest.priority = Priority.PRIORITY_HIGH_ACCURACY
+    val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+    val task = LocationServices.getSettingsClient(activity).checkLocationSettings(builder.build())
+    task.addOnFailureListener { exception ->
+        if (exception is ResolvableApiException) {
+            try {
+                exception.startResolutionForResult(activity, GPS_REQUEST_LOCATION)
+            } catch (_: Exception) {
+
             }
         }
     }
@@ -156,9 +191,13 @@ fun SendButton(
 @Composable
 private fun UserLocationNumbersPreview() {
     MastersDegreeTheme {
-        UserLocationNumbers(
-            locationEntity = LocationEntity(longitude = 1.0, latitude = 1.0),
-            requestLocationUpdates = { }
-        )
+        Column {
+            UserLocationNumbers(
+                locationEntity = LocationEntity(longitude = 1.0, latitude = 1.0),
+                requestLocationUpdates = { }
+            )
+            SendButton(onClick = {}, activity = Activity())
+        }
     }
 }
+

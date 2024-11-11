@@ -44,6 +44,7 @@ def receive_data():
 
     # Формируем данные для записи и отправки обратно
     response_data = {
+        "timestamp": datetime.now().isoformat(),
         "location": {
             "longitude": longitude,
             "latitude": latitude
@@ -53,8 +54,7 @@ def receive_data():
             "y": y,
             "z": z,
             "vector": vector
-        },
-        "timestamp": datetime.now().isoformat()
+        }
     }
 
     # Сохраняем данные в файл

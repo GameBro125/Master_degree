@@ -1,5 +1,6 @@
 package com.example.mastersdegree
 
+import android.app.Activity
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.snapshotFlow
@@ -18,6 +19,11 @@ import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
 import com.example.mastersdegree.feature.magnetic.shared.api.MagneticService
 import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
 import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,7 +48,6 @@ class MainViewModel(
 
     private val _state = MutableStateFlow(MainViewState())
     val state = _state.asStateFlow()
-
 
     init {
         observeLocation()
@@ -151,7 +156,7 @@ class MainViewModel(
                     magneticField = _state.value.magneticField!!
                 )
 
-                if (data.location == null || data.magneticField == null) {
+                if (data.magneticField == null) {
                     Toast.makeText(
                         context,
                         context.getString(R.string.sending_error),
@@ -181,10 +186,27 @@ class MainViewModel(
         }
     }
 
+    fun showEnableLocationSetting(activity: Activity) {
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = Priority.PRIORITY_HIGH_ACCURACY
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val task = LocationServices.getSettingsClient(activity).checkLocationSettings(builder.build())
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(activity, GPS_REQUEST_LOCATION)
+                } catch (_: Exception) {
+
+                }
+            }
+        }
+    }
+
 
     companion object {
         val LOCATION_MANAGER_KEY = object : CreationExtras.Key<LocationDataStore> {}
         val MAGNETIC_SENSOR_MANAGER_KEY = object : CreationExtras.Key<MagneticSensorDataStore> {}
+        const val GPS_REQUEST_LOCATION = 1001
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
