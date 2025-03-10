@@ -1,122 +1,116 @@
 package com.example.mastersdegree
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.mastersdegree.domain.MagneticField
-import com.example.mastersdegree.domain.MagneticSensorManager
-import com.example.mastersdegree.domain.remote.ApiService
-import com.example.mastersdegree.domain.remote.MagneticFieldViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.MutableCreationExtras
+import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
+import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
+import com.example.mastersdegree.feature.location.ui.component.SendButton
+import com.example.mastersdegree.feature.location.ui.component.UserLocationNumbers
+import com.example.mastersdegree.feature.location.ui.component.showEnableLocationSetting
+import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
+import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.magnetic.ui.component.MagneticFieldNumbers
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
-import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
+
+    private val locationDataStore by lazy { LocationDataStore(activity = this) }
+    private val magneticSensorDataStore by lazy { MagneticSensorDataStore(context = this) }
+
+    private val viewModelStoreOwner: ViewModelStoreOwner = this
+    private val mainViewModel by lazy {
+        ViewModelProvider.create(
+            owner = viewModelStoreOwner,
+            factory = MainViewModel.Factory,
+            extras = MutableCreationExtras().apply {
+                set(MainViewModel.LOCATION_MANAGER_KEY, locationDataStore)
+                set(MainViewModel.MAGNETIC_SENSOR_MANAGER_KEY, magneticSensorDataStore)
+            }
+        )[MainViewModel::class]
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val magneticSensorManager = MagneticSensorManager(context = this)
-
         enableEdgeToEdge()
+
         setContent {
             MastersDegreeTheme {
-                Surface (Modifier.fillMaxSize().padding(16.dp))
-                {
-                    val magneticField by remember { magneticSensorManager.magneticField }
-                    MagneticFieldInfo(
-                        magneticField = magneticField,
-                        modifier = Modifier
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val state by mainViewModel.state.collectAsStateWithLifecycle()
+                    val sendData by remember {
+                        mutableStateOf({
+                            mainViewModel.sendData(this)
+                        })
+                    }
+                    val requestLocationUpdates by remember {
+                        mutableStateOf({ locationDataStore.requestLocationUpdates() })
+                    }
+                    MainField(
+                        magneticField = state.magneticField,
+                        userLocation = state.location,
+                        onButtonClick = sendData,
+                        requestLocationUpdates = requestLocationUpdates,
+                        activity = this
                     )
                 }
             }
         }
-
     }
 }
 
 @Composable
-fun MagneticFieldInfo(
-    modifier: Modifier,
-    magneticField: MagneticField
+fun MainField(
+    modifier: Modifier = Modifier,
+    magneticField: MagneticFieldEntity?,
+    userLocation: LocationEntity?,
+    requestLocationUpdates: () -> Unit,
+    onButtonClick: () -> Unit,
+    activity: Activity
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    )
-    {
-        Column(
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier
-                .fillMaxWidth(0.4F)
-                .fillMaxHeight(0.9F)
+    ) {
+        UserLocationNumbers(
+            modifier = Modifier.padding(bottom = 32.dp),
+            locationEntity = userLocation,
+            requestLocationUpdates = requestLocationUpdates,
         )
-        {
-            Text(
-                text = "X: " + magneticField.x,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W300
-            )
-            Text(
-                text = "Y: " + magneticField.y,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W300
-            )
-            Text(
-                text = "Z: " + magneticField.z,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W300
-            )
-            Text(
-                text = "|B|: " + magneticField.getVector(),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W300
-            )
-        }
-        StateButton(modifier = Modifier, magneticField = magneticField)
-    }
-}
 
-@Composable
-fun StateButton(modifier: Modifier,     magneticField: MagneticField
-) {
-    Row() {
-        Button(
-            onClick = { println("херня включена") },
-        ) {
-            Text("Включить")
-        }
-        Spacer(modifier = Modifier.padding(16.dp))
-        Button(
-            onClick = {
-                val viewModel: MagneticFieldViewModel = MagneticFieldViewModel()
-                viewModel.sendMagneticFieldData(magneticField)
-            },
-        ) {
-            Text("Выключить")
-        }
+        if (magneticField != null)
+            MagneticFieldNumbers(
+                modifier = Modifier.padding(bottom = 20.dp),
+                magneticField = magneticField
+            )
+
+        SendButton(
+            onClick = onButtonClick,
+            activity = activity
+        )
     }
 }
 
@@ -124,10 +118,17 @@ fun StateButton(modifier: Modifier,     magneticField: MagneticField
 @Composable
 fun Preview() {
     MastersDegreeTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            MagneticFieldInfo(
-                magneticField = MagneticField(),
-                modifier = Modifier
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            MainField(
+                magneticField = MagneticFieldEntity(),
+                userLocation = LocationEntity(longitude = 1.0, latitude = 1.0),
+                requestLocationUpdates = {},
+                onButtonClick = {},
+                activity = MainActivity(),
             )
         }
     }
