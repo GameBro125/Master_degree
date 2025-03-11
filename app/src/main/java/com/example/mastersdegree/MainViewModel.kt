@@ -21,7 +21,7 @@ import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSenso
 import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationServices  //переделал
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
