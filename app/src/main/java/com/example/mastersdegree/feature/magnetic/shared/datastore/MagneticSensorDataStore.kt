@@ -17,7 +17,9 @@ import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEnt
 class MagneticSensorDataStore(context: Context) : SensorEventListener {
 
     private val sensorManager: SensorManager? = getSystemService(context, SensorManager::class.java)
-    private val geomagneticSensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+    private val geomagneticSensor: Sensor? =
+        sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+
 
     init {
         sensorManager?.registerListener(
@@ -25,6 +27,8 @@ class MagneticSensorDataStore(context: Context) : SensorEventListener {
             geomagneticSensor,
             SensorManager.SENSOR_DELAY_NORMAL,
         )
+
+
     }
 
     var magneticField by mutableStateOf(MagneticFieldEntity())
