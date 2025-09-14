@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.magnetic.ui.presentation
+package com.example.mastersdegree.feature.summaryUserInfo.magnetic.ui.presentation
 
 import androidx.compose.runtime.Stable
 

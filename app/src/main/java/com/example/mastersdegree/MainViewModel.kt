@@ -10,15 +10,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.mastersdegree.feature.location.shared.api.LocationService
-import com.example.mastersdegree.feature.location.shared.datastore.LocationDataStore
+import com.example.mastersdegree.feature.summaryUserInfo.location.shared.api.LocationService
+import com.example.mastersdegree.feature.summaryUserInfo.location.shared.datastore.LocationDataStore
 import com.example.mastersdegree.data.remote.MagneticRetrofitStore
 import com.example.mastersdegree.data.remote.RemoteDataEntity
 import com.example.mastersdegree.data.remote.api.DataService
-import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
-import com.example.mastersdegree.feature.magnetic.shared.api.MagneticService
-import com.example.mastersdegree.feature.magnetic.shared.datastore.MagneticSensorDataStore
-import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.api.MagneticService
+import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.datastore.MagneticSensorDataStore
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -38,12 +36,9 @@ class MainViewModel(
     private val locationDataStore: LocationDataStore,
     private val magneticSensorDataStore: MagneticSensorDataStore,
     private val scopeIO: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO),
-    private val scopeUI: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main.immediate),
 ) : ViewModel() {
 
     // TODO Перенести в конструктор // TODO Удалить устаревшие запросы
-    private val apiMagneticFieldService by lazy { MagneticRetrofitStore.body.create(MagneticService::class.java) }
-    private val apiLocationService by lazy { MagneticRetrofitStore.body.create(LocationService::class.java) }
     private val apiDataService by lazy { MagneticRetrofitStore.body.create(DataService::class.java) }
 
     private val _state = MutableStateFlow(MainViewState())
@@ -74,76 +69,6 @@ class MainViewModel(
             .launchIn(scopeIO)
     }
 
-    // TODO убрать context // TODO удалить устревшие функции
-    fun sendMagneticFieldData(context: Context) {
-        viewModelScope.launch {
-            try {
-                val magneticField = _state.value.magneticField
-                if (magneticField == null) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.sending_error),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                val response = apiMagneticFieldService.sendMagneticField(magneticField)
-                if (response.isSuccessful) {
-                    // Обработка успешного ответа
-                    val vector = response.body()?.vector
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.data_sent),
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.sending_error),
-                        Toast.LENGTH_LONG
-                    ).show()
-
-            } catch (e: Exception) {
-                println("Ошибка: ${e.localizedMessage}")
-            }
-        }
-    }
-
-    // TODO убрать context // TODO удалить устревшие функции
-    fun sendLocationData(context: Context) {
-        viewModelScope.launch {
-            try {
-                val location = _state.value.location
-                if (location == null) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.sending_error),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                val response = apiLocationService.sendLocation(location)
-                if (response.isSuccessful) {
-                    // Обработка успешного ответа
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.data_sent),
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.sending_error),
-                        Toast.LENGTH_LONG
-                    ).show()
-
-            } catch (e: Exception) {
-                println("Ошибка: ${e.localizedMessage}")
-            }
-        }
-    }
 
     // TODO реворкнуть эту констркцию ущербную
     // TODO убрать context
@@ -173,35 +98,12 @@ class MainViewModel(
                         context.getString(R.string.data_sent),
                         Toast.LENGTH_LONG
                     ).show()
-                } else
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.sending_error),
-                        Toast.LENGTH_LONG
-                    ).show()
-
+                }
             } catch (e: Exception) {
                 println("Ошибка: ${e.localizedMessage}")
             }
         }
     }
-
-    fun showEnableLocationSetting(activity: Activity) {
-        val locationRequest = LocationRequest.create()
-        locationRequest.priority = Priority.PRIORITY_HIGH_ACCURACY
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        val task = LocationServices.getSettingsClient(activity).checkLocationSettings(builder.build())
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                try {
-                    exception.startResolutionForResult(activity, GPS_REQUEST_LOCATION)
-                } catch (_: Exception) {
-
-                }
-            }
-        }
-    }
-
 
     companion object {
         val LOCATION_MANAGER_KEY = object : CreationExtras.Key<LocationDataStore> {}

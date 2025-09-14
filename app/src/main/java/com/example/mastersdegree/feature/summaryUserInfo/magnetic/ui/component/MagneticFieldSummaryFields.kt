@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.magnetic.ui.component
+package com.example.mastersdegree.feature.summaryUserInfo.magnetic.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -7,11 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.entity.MagneticFieldEntity
 import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 
 @Composable
-fun MagneticFieldNumbers(
+fun MagneticFieldSummaryFields(
     modifier: Modifier = Modifier,
     magneticField: MagneticFieldEntity, // TODO: Presentation
 ) {
@@ -43,7 +43,7 @@ fun MagneticFieldNumbers(
 @Composable
 private fun MagneticFieldNumbersPreview() {
     MastersDegreeTheme {
-        MagneticFieldNumbers(
+        MagneticFieldSummaryFields(
             magneticField = MagneticFieldEntity()
         )
     }

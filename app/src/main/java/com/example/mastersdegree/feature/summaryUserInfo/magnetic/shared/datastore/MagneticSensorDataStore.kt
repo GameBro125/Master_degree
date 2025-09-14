@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.magnetic.shared.datastore
+package com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.datastore
 
 
 import android.content.Context
@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat.getSystemService
-import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.entity.MagneticFieldEntity
 
 
 // Добавить интерфейс

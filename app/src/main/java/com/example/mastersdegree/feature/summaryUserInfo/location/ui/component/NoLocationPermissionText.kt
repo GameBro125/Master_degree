@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.location.ui.component
+package com.example.mastersdegree.feature.summaryUserInfo.location.ui.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text

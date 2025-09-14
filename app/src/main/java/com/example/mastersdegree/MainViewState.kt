@@ -1,8 +1,8 @@
 package com.example.mastersdegree
 
 import com.example.mastersdegree.data.remote.RemoteDataEntity
-import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
-import com.example.mastersdegree.feature.magnetic.shared.entity.MagneticFieldEntity
+import com.example.mastersdegree.feature.summaryUserInfo.location.shared.entity.LocationEntity
+import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.entity.MagneticFieldEntity
 
 // TODO: Make Presentation // теперь тут ещё одна сущность ?: kringe
 data class MainViewState(

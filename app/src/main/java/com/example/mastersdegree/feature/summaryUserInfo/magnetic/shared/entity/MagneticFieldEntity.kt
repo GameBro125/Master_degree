@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.magnetic.shared.entity
+package com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.entity
 
 import kotlin.math.sqrt
 

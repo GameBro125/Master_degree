@@ -1,4 +1,4 @@
-package com.example.mastersdegree.feature.location.shared.datastore
+package com.example.mastersdegree.feature.summaryUserInfo.location.shared.datastore
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -6,7 +6,7 @@ import android.location.Location
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.mastersdegree.feature.location.shared.entity.LocationEntity
+import com.example.mastersdegree.feature.summaryUserInfo.location.shared.entity.LocationEntity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
