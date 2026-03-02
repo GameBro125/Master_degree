@@ -1,21 +1,27 @@
 package com.example.mastersdegree.feature.summaryUserInfo.view
 
 import android.app.Activity
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.mastersdegree.MainActivity
@@ -30,48 +36,37 @@ import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 
 
 @Composable
-fun MainActivity.MagneticFieldInfoScreen() {
-
-    val viewModelStoreOwner: ViewModelStoreOwner = this
-
-    val mainViewModel by lazy {
-        ViewModelProvider.create(
-            owner = viewModelStoreOwner,
-            factory = MainViewModel.Factory,
-            extras = MutableCreationExtras().apply {
-                set(MainViewModel.LOCATION_MANAGER_KEY, locationDataStore)
-                set(MainViewModel.MAGNETIC_SENSOR_MANAGER_KEY, magneticSensorDataStore)
-            }
-        )[MainViewModel::class]
-    }
-
-    val locationViewModel by lazy {
-        ViewModelProvider.create(
-            owner = viewModelStoreOwner,
-            factory = LocationViewModel.Factory,
-            extras = MutableCreationExtras().apply {
-                set(LocationViewModel.LOCATION_MANAGER_KEY, locationDataStore)
-            }
-        )[MainViewModel::class]
-    }
-
+fun MagneticFieldInfoScreen(
+    mainViewModel: MainViewModel,
+    locationViewModel: LocationViewModel
+) {
     val state by mainViewModel.state.collectAsStateWithLifecycle()
+    val locationState by locationViewModel.state.collectAsStateWithLifecycle()
 
-    val sendData by remember {
-        mutableStateOf({
-            mainViewModel.sendData(this)
-        })
-    }
-    val requestLocationUpdates by remember {
-        mutableStateOf({ locationDataStore.requestLocationUpdates() })
-    }
+    // Отправка данных
+    val sendData = rememberUpdatedState(newValue = {
+        mainViewModel.sendData()
+    })
+
+    // Запрос обновлений локации
+    val requestLocationUpdates = rememberUpdatedState(newValue = {
+        locationViewModel.requestLocationUpdates()
+    })
+
+
     MagneticFieldInfoContent(
         magneticField = state.magneticField,
-        userLocation = locationViewModel.state.collectAsStateWithLifecycle().value.location,
-        onButtonClick = sendData,
-        requestLocationUpdates = requestLocationUpdates,
-        activity = this
+        userLocation = locationState.location,
+        onButtonClick = sendData.value,
+        requestLocationUpdates = requestLocationUpdates.value,
+        activity = LocalContext.current as ComponentActivity
     )
+
+    Text(
+        modifier = Modifier.padding(top = 40.dp),
+        text = "${mainViewModel.sendResult.collectAsStateWithLifecycle().value}"
+    )
+
 }
 
 @Composable

@@ -1,52 +1,59 @@
 package com.example.mastersdegree.feature.summaryUserInfo.location.shared.datastore
 
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Context
 import android.location.Location
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.os.Looper
 import com.example.mastersdegree.feature.summaryUserInfo.location.shared.entity.LocationEntity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-// TODO: Похорошему сделать интерфейс
-class LocationDataStore(activity: Activity) {
-    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
+// Интерфейс для абстрагирования источника локации
+interface ILocationDataStore {
+    val currentLocation: StateFlow<LocationEntity?>
+    fun requestLocationUpdates()
+    fun stopLocationUpdates()
+}
+
+// Реализация через FusedLocationProviderClient
+class LocationDataStore(context: Context) : ILocationDataStore {
+
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context.applicationContext)
 
     private var lastKnownLocation: Location? = null
-    var currentLocation: LocationEntity? by mutableStateOf(null)
 
-    private val locationRequest: LocationRequest = LocationRequest.create().apply {
-        interval = 5000
-        fastestInterval = 5000
-        priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-    }
+    private val _currentLocation = MutableStateFlow<LocationEntity?>(null)
+    override val currentLocation: StateFlow<LocationEntity?> = _currentLocation.asStateFlow()
+
+    private val locationRequest: LocationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000L).build()
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            val lastLocation = locationResult.lastLocation
-            if (lastLocation != null)
-                updateLocation(lastLocation)
+            val location = locationResult.lastLocation ?: return
+            updateLocation(location)
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun requestLocationUpdates() {
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            null
-        )
+    override fun requestLocationUpdates() {
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    }
+
+    override fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun updateLocation(location: Location) {
         val distance = lastKnownLocation?.distanceTo(location) ?: Float.MAX_VALUE
-        if (distance > 1) { // Обновление состояния, если изменение > 10 метров
+        if (distance > 10f) { // обновляем, если изменение > 10 метров
             lastKnownLocation = location
-            currentLocation = LocationEntity(
+            _currentLocation.value = LocationEntity(
                 longitude = location.longitude,
                 latitude = location.latitude
             )

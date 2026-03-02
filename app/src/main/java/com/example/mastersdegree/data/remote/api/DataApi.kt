@@ -6,6 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface DataService {
-    @POST("magnetic-field")
+    @POST("/magnetic-field")
     suspend fun sendData(@Body location: RemoteDataEntity): Response<RemoteDataEntity>
 }
