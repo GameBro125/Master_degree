@@ -6,13 +6,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +40,7 @@ import com.example.mastersdegree.domain.model.MagneticField
 import com.example.mastersdegree.feature.summary.presentation.SendResult
 import com.example.mastersdegree.feature.summary.presentation.SummaryIntent
 import com.example.mastersdegree.feature.summary.presentation.SummaryViewModel
+import com.example.mastersdegree.ui.theme.MastersDegreeTheme
 import com.eygraber.compose.permissionx.PermissionStatus
 import com.eygraber.compose.permissionx.rememberPermissionState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -56,59 +66,119 @@ fun SummaryScreen(
             viewModel.onIntent(SummaryIntent.StopLocationUpdates)
         }
     }
+    when (locationPermissionState.status) {
+        PermissionStatus.NotGranted.Denied -> LocationPermissionAlert(
+            label = stringResource(R.string.locationPermissionAsk),
+            onRequestPermission = { locationPermissionState.launchPermissionRequest() },
+            onDismissRequest = { }
+        )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        LocationBlock(
-            location = state.location,
-            permissionStatus = locationPermissionState.status,
-            requestPermission = { locationPermissionState.launchPermissionRequest() },
-            openAppSettings = { locationPermissionState.openAppSettings() },
+        PermissionStatus.NotGranted.NotRequested -> LocationPermissionAlert(
+            label = stringResource(R.string.locationPermissionAsk),
+            onRequestPermission = { locationPermissionState.launchPermissionRequest() },
+            onDismissRequest = { }
         )
-        Spacer(modifier = Modifier.padding(top = 16.dp))
-        MagneticBlock(magneticField = state.magneticField)
-        Spacer(modifier = Modifier.padding(top = 20.dp))
-        SendButton(
-            permissionStatus = locationPermissionState.status,
-            onGrantedClick = { viewModel.onIntent(SummaryIntent.SendSummary) },
-            requestPermission = { locationPermissionState.launchPermissionRequest() },
-            openAppSettings = { locationPermissionState.openAppSettings() },
-            isLoading = state.sendResult is SendResult.Loading
+
+        PermissionStatus.NotGranted.PermanentlyDenied -> LocationPermissionAlert(
+            label = stringResource(R.string.locationPermissionAsk),
+            onRequestPermission = { locationPermissionState.openAppSettings() },
+            onDismissRequest = { }
         )
-        Spacer(modifier = Modifier.padding(top = 24.dp))
-        SendResultText(sendResult = state.sendResult)
+
+        PermissionStatus.Granted ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                LocationBlock(
+                    location = state.location,
+                )
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+                MagneticBlock(magneticField = state.magneticField)
+                Spacer(modifier = Modifier.padding(top = 20.dp))
+                SendButton(
+                    permissionStatus = locationPermissionState.status,
+                    onGrantedClick = { viewModel.onIntent(SummaryIntent.SendSummary) },
+                    requestPermission = { locationPermissionState.launchPermissionRequest() },
+                    openAppSettings = { locationPermissionState.openAppSettings() },
+                    isLoading = state.sendResult is SendResult.Loading
+                )
+                Spacer(modifier = Modifier.padding(top = 24.dp))
+                SendResultText(sendResult = state.sendResult)
+            }
     }
+
 }
 
 @Composable
 private fun LocationBlock(
     location: Location?,
-    permissionStatus: PermissionStatus,
-    requestPermission: () -> Unit,
-    openAppSettings: () -> Unit,
 ) {
-    when (permissionStatus) {
-        PermissionStatus.Granted -> {
-            if (location == null) {
-                Text(text = "Waiting for location...", fontSize = 18.sp)
-            } else {
-                Text(text = "${stringResource(R.string.latitude)} ${location.latitude}", fontSize = 22.sp)
-                Text(text = "${stringResource(R.string.longitude)} ${location.longitude}", fontSize = 22.sp)
+    if (location == null) {
+        Text(text = "Waiting for location...", fontSize = 18.sp)
+    } else {
+        Text(
+            text = "${stringResource(R.string.latitude)} ${location.latitude}",
+            fontSize = 22.sp
+        )
+        Text(
+            text = "${stringResource(R.string.longitude)} ${location.longitude}",
+            fontSize = 22.sp
+        )
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationPermissionAlert(
+    onRequestPermission: () -> Unit,
+    onDismissRequest: () -> Unit,
+    label: String,
+    buttonText: String = stringResource(R.string.grant_permission)
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+    ) {
+        Card(Modifier.fillMaxSize(0.4F)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = label,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Button(
+                    onClick = onRequestPermission
+                ) {
+                    Text(text = buttonText)
+                }
             }
         }
-        PermissionStatus.NotGranted.NotRequested -> {
-            PermissionText(onClick = requestPermission)
-        }
-        PermissionStatus.NotGranted.Denied -> {
-            PermissionText(onClick = requestPermission)
-        }
-        PermissionStatus.NotGranted.PermanentlyDenied -> {
-            PermissionText(onClick = openAppSettings)
+    }
+}
+
+@Preview
+@Composable
+private fun LocationPermissionAlertPreview() {
+    MastersDegreeTheme {
+        Surface(Modifier.fillMaxSize()) {
+            LocationPermissionAlert(
+                onRequestPermission = { },
+                onDismissRequest = { },
+                label = stringResource(R.string.locationPermissionAsk),
+                buttonText = "give permission"
+            )
         }
     }
 }
@@ -133,7 +203,11 @@ private fun SendButton(
         PermissionStatus.Granted -> {
             Button(onClick = onGrantedClick, enabled = !isLoading) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(16.dp)
+                    )
                 }
                 Text(text = stringResource(R.string.sendButton))
                 Icon(
@@ -143,9 +217,11 @@ private fun SendButton(
                 )
             }
         }
+
         PermissionStatus.NotGranted.PermanentlyDenied -> {
             DisabledSendButton(onClick = openAppSettings)
         }
+
         else -> {
             DisabledSendButton(onClick = requestPermission)
         }
@@ -155,7 +231,7 @@ private fun SendButton(
 @Composable
 private fun DisabledSendButton(onClick: () -> Unit) {
     Button(
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+        colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Gray),
         onClick = onClick
     ) {
         Text(text = stringResource(R.string.noSendPermissionButtonText))

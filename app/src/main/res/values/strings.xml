@@ -7,4 +7,5 @@
     <string name="sending_error">Sending error</string>
     <string name="noSendPermissionButtonText">No permission</string>
     <string name="locationPermissionAsk">Give geolocation permission</string>
+    <string name="grant_permission">Grant permission</string>
 </resources>

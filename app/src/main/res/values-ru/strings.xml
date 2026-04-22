@@ -8,4 +8,5 @@
     <string name="sending_error">Ошибка отправки</string>
     <string name="noSendPermissionButtonText">Нет разрешения</string>
     <string name="locationPermissionAsk">Дайте разрешение на геолокацияю</string>
+    <string name="grant_permission">Предоставить разрешение</string>
 </resources>
