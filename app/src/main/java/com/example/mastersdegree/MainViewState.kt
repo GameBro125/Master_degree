@@ -4,7 +4,6 @@ import com.example.mastersdegree.data.remote.RemoteDataEntity
 import com.example.mastersdegree.feature.summaryUserInfo.location.shared.entity.LocationEntity
 import com.example.mastersdegree.feature.summaryUserInfo.magnetic.shared.entity.MagneticFieldEntity
 
-// TODO: Make Presentation // теперь тут ещё одна сущность ?: kringe
 data class MainViewState(
     val location: LocationEntity? = null,
     val magneticField: MagneticFieldEntity? = null,
