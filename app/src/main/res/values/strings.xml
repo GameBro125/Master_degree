@@ -8,4 +8,6 @@
     <string name="noSendPermissionButtonText">No permission</string>
     <string name="locationPermissionAsk">Give geolocation permission</string>
     <string name="grant_permission">Grant permission</string>
+    <string name="foreground_service_title">Background tracking enabled</string>
+    <string name="foreground_service_text">Data is sent every minute</string>
 </resources>

@@ -20,6 +20,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SummaryViewModel(
@@ -35,6 +38,7 @@ class SummaryViewModel(
 
     private val _effects = MutableSharedFlow<SummaryEffect>()
     val effects: SharedFlow<SummaryEffect> = _effects.asSharedFlow()
+    private var monitoringJob: Job? = null
 
     init {
         observeLocationUseCase()
@@ -58,6 +62,34 @@ class SummaryViewModel(
                 _state.update { it.copy(sendResult = SendResult.Idle) }
             }
             SummaryIntent.SendSummary -> sendSummary()
+            is SummaryIntent.SetMonitoringEnabled -> setMonitoring(intent.enabled)
+            is SummaryIntent.SetSendIntervalSeconds -> {
+                _state.update { it.copy(sendIntervalSeconds = intent.seconds.coerceAtLeast(1)) }
+                restartMonitoringIfNeeded()
+            }
+        }
+    }
+
+    private fun setMonitoring(enabled: Boolean) {
+        _state.update { it.copy(monitoringEnabled = enabled) }
+        if (!enabled) {
+            monitoringJob?.cancel()
+            monitoringJob = null
+            return
+        }
+        restartMonitoringIfNeeded()
+    }
+
+    private fun restartMonitoringIfNeeded() {
+        if (!_state.value.monitoringEnabled) return
+
+        monitoringJob?.cancel()
+        monitoringJob = viewModelScope.launch {
+            while (isActive && _state.value.monitoringEnabled) {
+                sendSummary()
+                val delayMs = _state.value.sendIntervalSeconds * 1000L
+                delay(delayMs)
+            }
         }
     }
 
